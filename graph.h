@@ -15,6 +15,7 @@ typedef struct edge {
 
 typedef struct graph {
     int num_vertices;           // total number of vertices
+    int num_edges;              // total number of vertices
     vertex_p vertices;          // pointer to first element of linked list of vertices
     edge_p edges;               // pointer to first element of linked list of edges
 } graph_t, *graph_p;
