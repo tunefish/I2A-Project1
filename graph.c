@@ -3,6 +3,5 @@
 
 #include "graph.h"
 
-void reset_visited(graph_p graph) {
-    
+void reset(graph_p graph) {
 }

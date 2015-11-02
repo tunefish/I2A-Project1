@@ -4,6 +4,7 @@
 typedef struct vertex {
     void *data;                 // pointer to data represented by this vertex
     int visited;                // visited flag
+    int depth;                  // depth of this vertex
     struct edge *neighbors;     // pointer to first element of linked list of neighbors
     struct vertex *next;        // pointer to next vertex in vertex list
 } vertex_t, *vertex_p;
@@ -23,6 +24,6 @@ typedef struct species {
 } species_t, *species_p;
 
 // graph functions.. add_vertex, add_edge, remove_vertex, remove_node
-void reset_visited(graph_p graph);
+void reset(graph_p graph);
 
 #endif

@@ -57,12 +57,10 @@ int main(int argc, void *argv) {
                 char *sp;
                 int order, num;
                 sscanf(command, "cite %d subtypes of %s of order %d", num, sp, order);
-                char **result;
-                int found = num_children(graph, sp, order, num, result);
+                queue_p result = num_children(graph, sp, order, num);
                 
-                int i;
-                for (i=0; i<found; i++) {
-                    printf("%s\n", *(found+i));
+                while (!is_empty(result)) {
+                    printf("%s\n", ((species_p) ((vertex_p) dequeue(result))->data)->name);
                 }
             } else {
                 printf("Error: no file opened\n");
