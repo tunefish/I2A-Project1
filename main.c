@@ -19,11 +19,6 @@ int main(int argc, void *argv) {
         printf(" > ");
         char *command = read_line(stdin);
         
-        // remove newline characted at the end of the string
-        if (*(command + strlen(command) - 1) == '\n') {
-            *(command + strlen(command) - 1) = '\0';
-        }
-        
         if (strcmp(command, "exit") == 0) {
             // exit program
             exit = 1;
@@ -32,46 +27,48 @@ int main(int argc, void *argv) {
         } else if (starts_with(command, "open")) {
             // opens a file
 			//where is the file opened??
-            if (strlen(command) > 5) {
-                // copy filename into file
-                char *file = (char*) malloc(strlen(command) - 4);
-                memcpy(file, command+5, strlen(command) - 4);
-                
-                printf("Opening file %s\n", file);
-                if (graph) {
-                    free_graph(graph);
-                    graph = NULL;
-                }
-                
-                graph = create_graph();
-					
-                char * line;		//pointer to line in file
+			if (strlen(command) > 5) {
+				// copy filename into file
+				char *file = (char*)malloc(strlen(command) - 4);
+				memcpy(file, command + 5, strlen(command) - 4);
+
+				printf("Opening file %s\n", file);
+				if (graph) {
+					free_graph(graph);
+					graph = NULL;
+				}
+
+				graph = create_graph();
+
+				char * line;		//pointer to line in file
 				char * pch;			//char pointer used while parsing with strtok
 
-                fr = fopen(file, "r");		//opens file
-                if (!fr) {
-                    return 1;
-                }
-
-                while ((line = read_line(fr)))
-                {
-                    printf("%s", line);			//print entire line
-
-					pch = strtok(line, ":");	//print line using : as delimiter
-					printf("%s\n", pch);
-					pch = strtok(NULL, ":");
-
-					pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
-					while (pch != NULL)
+				fr = fopen(file, "r");		//opens file
+				if (!fr) {
+					printf("Error: file %s not found\n", file);
+				}
+				else {
+					graph = create_graph();
+					while ((line = read_line(fr)))
 					{
+						printf("%s", line);			//print entire line
+
+						pch = strtok(line, ":");	//print line using : as delimiter
 						printf("%s\n", pch);
-						pch = strtok(NULL, ", ");
+						pch = strtok(NULL, ":");
+
+						pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
+						while (pch != NULL)
+						{
+							printf("%s\n", pch);
+							pch = strtok(NULL, ", ");
+						}
 					}
-                }
-                
-				fclose(fr);
-                free(file);
-            }
+
+					fclose(fr);
+					free(file);
+				}
+			}
             
         } else if (strcmp(command, "close") == 0) {
             // close currently opened file
@@ -188,5 +185,16 @@ char *read_line(FILE *ptr) {
     }
 
     *line = '\0';
+    
+    // nothing read => return NULL
+    if (strlen(linep) == 0) {
+        return NULL;
+    }
+    
+    // remove newline characted at the end of the string
+    if (*(line - 1) == '\n') {
+        *(line - 1) = '\0';
+    }
+    
     return linep;
 }
