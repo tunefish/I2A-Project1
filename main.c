@@ -11,6 +11,8 @@
 int main(int argc, void *argv) {
     graph_p graph = NULL;
 
+	FILE * fr;		//file pointer
+
     int exit = 0;
     char *command;
     while (!exit) {
@@ -42,7 +44,19 @@ int main(int argc, void *argv) {
                 }
                 
                 graph = create_graph();
+					
+                char * line;
+                fr = fopen(file, "r");
+                if (!fr) {
+                    return 1;
+                }
+
+                while ((line = read_line(fr)))
+                {
+                    printf("%s", line);
+                }
                 
+				fclose(fr);
                 free(file);
             }
             
