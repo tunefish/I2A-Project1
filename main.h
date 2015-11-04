@@ -1,2 +1,2 @@
 int starts_with(char *str, char *pre);
-char *read_from_console(void);
+char *read_line(FILE *fr);

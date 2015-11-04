@@ -16,7 +16,6 @@ int main(int argc, void *argv) {
 	int n;
 	long elapsed_seconds;
 	char line[500];
-	clrscr();
 
     graph_p graph = malloc(sizeof(graph_t));
 
@@ -158,7 +157,7 @@ int starts_with(char *str, char *pre) {
 /*
  * Reads a line
  */
-char *read_line(int ptr) {
+char *read_line(FILE *fr) {
     char *line = malloc(128), *linep = line;
     size_t lenmax = 128, len = lenmax;
     int c;
@@ -168,7 +167,7 @@ char *read_line(int ptr) {
     }
 
     for (;;) {
-        c = fgetc(ptr);
+        c = fgetc(fr);
         if(c == EOF) {
             break;
         }
