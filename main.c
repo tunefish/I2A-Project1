@@ -11,13 +11,6 @@
 FILE *fr; //declare the file pointer
 
 int main(int argc, void *argv) {
-    
-	//stuff for opening file
-	int n;
-	long elapsed_seconds;
-	char line[500];
-	clrscr();
-
     graph_p graph = malloc(sizeof(graph_t));
 
     int exit = 0;
@@ -42,7 +35,7 @@ int main(int argc, void *argv) {
 			//where is the file opened??
             if (strlen(command) > 5) {
                 // copy filename into file
-                char file[strlen(command) - 4];
+                char *file = (char*) malloc(strlen(command) - 4);
                 memcpy(file, command+5, strlen(command) - 4);
                 
                 printf("Opening file %s\n", file);
@@ -51,31 +44,8 @@ int main(int argc, void *argv) {
                 }
 
                 file_loaded = 1;
-
-				//open file
-				fr = fopen(file[strlen(command) - 4], "rt");
-				//read file
-				int file_depth = 0; //depth of graph from file
-				while (fgets(line, 500, fr) != NULL)
-				{
-					//get a line of 500 chars from fr. done if Null
-					sscanf(line, "%s\n", &elapsed_seconds); 
-					
-					//TODO: parse lines and turn into graph
-					//1. read until : delimeter. A new vertex should be created where...
-					//*data = parsed string, visited = 1, depth = file_depth, neighbors and next are null
-					//***check if vertex already exists. if it does, do not create it again, just be sure
-					// to add children
-					//2. read until end of line while parsing a new string for every ,
-					// create a new vertex after every , found where...
-					// *data = parsed string, visited = 1, depth = file_depth+1, neighbors = all other strings 
-					// from this line
-					//3. go back to first vertex created (before :) and add all the new vertices as *next
-					file_depth++; 
-				}
-				//close file
-				fclose(fr);
-				
+                
+                free(file);
             }
             
         } else if (strcmp(command, "close") == 0) {
@@ -158,7 +128,7 @@ int starts_with(char *str, char *pre) {
 /*
  * Reads a line
  */
-char *read_line(int ptr) {
+char *read_line(FILE *ptr) {
     char *line = malloc(128), *linep = line;
     size_t lenmax = 128, len = lenmax;
     int c;

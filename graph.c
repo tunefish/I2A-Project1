@@ -4,4 +4,5 @@
 #include "graph.h"
 
 void reset(graph_p graph) {
+    
 }

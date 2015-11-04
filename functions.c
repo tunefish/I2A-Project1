@@ -5,6 +5,7 @@
 #include "functions.h"
 
 vertex_p find_vertex_by_name(graph_p graph, char *sp);
+vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart);
 
 queue_p num_children(graph_p graph, char *sp, int order, int num) {
     if (order < 1) {

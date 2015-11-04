@@ -3,10 +3,14 @@
 
 typedef struct vertex {
     void *data;                 // pointer to data represented by this vertex
-    int visited;                // visited flag
-    int depth;                  // depth of this vertex from the root
     struct edge *neighbors;     // pointer to first element of linked list of neighbors
     struct vertex *next;        // pointer to next vertex in vertex list
+    
+    /** DFS traversal flags **/
+    
+    int visited;                // visited flag
+    int depth;                  // depth of this vertex from the root
+    struct vertex *parent;      // parent in DFS tree
 } vertex_t, *vertex_p;
 
 typedef struct edge {
