@@ -4,7 +4,7 @@
 typedef struct vertex {
     void *data;                 // pointer to data represented by this vertex
     int visited;                // visited flag
-    int depth;                  // depth of this vertex
+    int depth;                  // depth of this vertex from the root
     struct edge *neighbors;     // pointer to first element of linked list of neighbors
     struct vertex *next;        // pointer to next vertex in vertex list
 } vertex_t, *vertex_p;

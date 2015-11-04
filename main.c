@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
+#include <dos.h>
 
 #include "main.h"
 #include "graph.h"
 #include "functions.h"
 
-int main(int argc, void *argv) {
-    // TODO: load file specified in first parameter
+FILE *fr; //declare the file pointer
 
-    // TODO: parse and store graph in graph
+int main(int argc, void *argv) {
+    
+	//stuff for opening file
+	int n;
+	long elapsed_seconds;
+	char line[500];
+	clrscr();
+
     graph_p graph = malloc(sizeof(graph_t));
 
     int exit = 0;
@@ -31,6 +39,7 @@ int main(int argc, void *argv) {
             
         } else if (starts_with(command, "open")) {
             // opens a file
+			//where is the file opened??
             if (strlen(command) > 5) {
                 // copy filename into file
                 char file[strlen(command) - 4];
@@ -40,8 +49,33 @@ int main(int argc, void *argv) {
                 if (file_loaded) {
                     // TODO: close opened file
                 }
-                // TODO: read file
+
                 file_loaded = 1;
+
+				//open file
+				fr = fopen(file[strlen(command) - 4], "rt");
+				//read file
+				int file_depth = 0; //depth of graph from file
+				while (fgets(line, 500, fr) != NULL)
+				{
+					//get a line of 500 chars from fr. done if Null
+					sscanf(line, "%s\n", &elapsed_seconds); 
+					
+					//TODO: parse lines and turn into graph
+					//1. read until : delimeter. A new vertex should be created where...
+					//*data = parsed string, visited = 1, depth = file_depth, neighbors and next are null
+					//***check if vertex already exists. if it does, do not create it again, just be sure
+					// to add children
+					//2. read until end of line while parsing a new string for every ,
+					// create a new vertex after every , found where...
+					// *data = parsed string, visited = 1, depth = file_depth+1, neighbors = all other strings 
+					// from this line
+					//3. go back to first vertex created (before :) and add all the new vertices as *next
+					file_depth++; 
+				}
+				//close file
+				fclose(fr);
+				
             }
             
         } else if (strcmp(command, "close") == 0) {
