@@ -19,11 +19,6 @@ int main(int argc, void *argv) {
         printf(" > ");
         char *command = read_line(stdin);
         
-        // remove newline characted at the end of the string
-        if (*(command + strlen(command) - 1) == '\n') {
-            *(command + strlen(command) - 1) = '\0';
-        }
-        
         if (strcmp(command, "exit") == 0) {
             // exit program
             exit = 1;
@@ -43,17 +38,16 @@ int main(int argc, void *argv) {
                     graph = NULL;
                 }
                 
-                graph = create_graph();
-					
                 char * line;
                 fr = fopen(file, "r");
                 if (!fr) {
-                    return 1;
-                }
-
-                while ((line = read_line(fr)))
-                {
-                    printf("%s", line);
+                    printf("Error: file %s not found\n", file);
+                } else {
+                    graph = create_graph();
+                    while ((line = read_line(fr)))
+                    {
+                        printf("%s\n", line);
+                    }
                 }
                 
 				fclose(fr);
@@ -175,5 +169,16 @@ char *read_line(FILE *ptr) {
     }
 
     *line = '\0';
+    
+    // nothing read => return NULL
+    if (strlen(linep) == 0) {
+        return NULL;
+    }
+    
+    // remove newline characted at the end of the string
+    if (*(line - 1) == '\n') {
+        *(line - 1) = '\0';
+    }
+    
     return linep;
 }
