@@ -45,15 +45,28 @@ int main(int argc, void *argv) {
                 
                 graph = create_graph();
 					
-                char * line;
-                fr = fopen(file, "r");
+                char * line;		//pointer to line in file
+				char * pch;			//char pointer used while parsing with strtok
+
+                fr = fopen(file, "r");		//opens file
                 if (!fr) {
                     return 1;
                 }
 
                 while ((line = read_line(fr)))
                 {
-                    printf("%s", line);
+                    printf("%s", line);			//print entire line
+
+					pch = strtok(line, ":");	//print line using : as delimiter
+					printf("%s\n", pch);
+					pch = strtok(NULL, ":");
+
+					pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
+					while (pch != NULL)
+					{
+						printf("%s\n", pch);
+						pch = strtok(NULL, ", ");
+					}
                 }
                 
 				fclose(fr);
