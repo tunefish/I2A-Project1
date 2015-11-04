@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "functions.h"
 
@@ -30,6 +31,7 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
     
     queue_p queue = create_queue();
     enqueue(queue, v);
+    v->depth = 0;
     
     // classic BFS:
     // repeat as long as there are more species to discover or we reached max wanted results (for all results: num < 0)
@@ -37,12 +39,9 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
         v = dequeue(queue);
         edge_p e = v->neighbors;
         
-        if (!e) {
-            continue; // no neighbors to process
-        }
-        
-        do {
+        while (e && num != 0) { // repeat for all neighbors until max number of results is reached
             if (!e->to->visited) {
+                e->to->visited = 1;
                 enqueue(result, e);
                 num--;
                 
@@ -51,7 +50,9 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
                     enqueue(queue, e->to);
                 }
             }
-        } while ((e = e->next) && num != 0); // repeat for all neighbors until max number of results is reached
+            
+            e = e->next;
+        }
     }
     
     free_queue(queue);
@@ -79,17 +80,15 @@ vertex_p most_diverse_subspecies(graph_p graph, char *sp) {
         v = dequeue(queue);
         edge_p e = v->neighbors;
         
-        if (!e) {
-            continue; // no neighbors to process
-        }
-        
         int neighbors = 0;
-        do {
+        while (e) {
             if (!e->to->visited) {
+                e->to->visited = 1;
                 enqueue(queue, e->to);
             }
             neighbors++;
-        } while((e = e->next));
+            e = e->next;
+        }
         
         if (neighbors > result_neighbors) {
             result = v;
@@ -101,29 +100,69 @@ vertex_p most_diverse_subspecies(graph_p graph, char *sp) {
     return result;
 }
 
-char* lowest_common_ancestor(graph_p graph, char *sp1, char *sp2) {
+vertex_p lowest_common_ancestor(graph_p graph, char *sp1, char *sp2, char *start) {
     vertex_p v1 = find_vertex_by_name(graph, sp1);
     vertex_p v2 = find_vertex_by_name(graph, sp2);
+    vertex_p vstart = find_vertex_by_name(graph, start);
 
-    if (!v1 || !v2) {
+    if (!v1 || !v2 || vstart) {
         return NULL;
     }
 
     reset(graph);
+    
+    edge_p e = vstart->neighbors;
+    
+    vertex_p result = NULL;
+    int depth = INT_MAX;
+    while (e) {
+        if (!e->to->visited) {
+            e->to->visited = 1;
+            e->to->depth = vstart->depth + 1;
+            vertex_p n = lowest_common_ancestor_internal(graph, v1, v2, e->to);
+            
+            if (n->depth < depth) {
+                depth = n->depth;
+                result = n;
+            }
+        }
+    }
 
-    return "";
+    return result;
+}
+
+vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart) {
+    edge_p e = vstart->neighbors;
+    
+    vertex_p result = NULL;
+    int depth = INT_MAX;
+    while (e) {
+        if (e->to == v1)
+        if (!e->to->visited) {
+            e->to->visited = 1;
+            e->to->depth = vstart->depth + 1;
+            vertex_p n = lowest_common_ancestor_internal(graph, v1, v2, e->to);
+            
+            if (n->depth < depth) {
+                depth = n->depth;
+                result = n;
+            }
+        }
+    }
+
+    return result;
 }
 
 vertex_p find_vertex_by_name(graph_p graph, char *sp) {
     vertex_p v = graph->vertices;
-
-    while (v->next && strcmp(((species_p) v->data)->name, sp) != 0) {
+    
+    while (v) {
+        if (strcmp(((species_p) v->data)->name, sp) != 0) {
+            return v;
+        }
+        
         v = v->next;
     }
 
-    if (strcmp(((species_p) v->data)->name, sp) != 0) {
-        return NULL;
-    }
-
-    return v;
+    return NULL;
 }

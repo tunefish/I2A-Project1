@@ -17,7 +17,7 @@ int main(int argc, void *argv) {
     char *command;
     while (!exit) {
         printf(" > ");
-        char *command = read_from_console();
+        char *command = read_line(stdin);
         
         // remove newline characted at the end of the string
         if (*(command + strlen(command) - 1) == '\n') {
@@ -93,9 +93,15 @@ int main(int argc, void *argv) {
         } else if (starts_with(command, "lowest common ancestor of")) {
             // lowest common ancestor of <species> and <species>
             if (file_loaded) {
-                char *sp1, *sp2;
-                sscanf(command, "lowest common ancestor of %s and %s");
-                lowest_common_ancestor(graph, sp1, sp2);
+                char *sp1, *sp2, *start;
+                sscanf(command, "lowest common ancestor of %s and %s starting from %s", sp1, sp2, start);
+                vertex_p result = lowest_common_ancestor(graph, sp1, sp2, start);
+                
+                if (!result) {
+                    printf("Couldn't find %s, %s or %s or %s and %s don't share a common ancestor which is a subspecies of %s\n", sp1, sp2, start, sp1, sp2, start);
+                } else {
+                    printf("%s\n", ((species_p) result->data)->name);
+                }
             } else {
                 printf("Error: no file opened\n");
             }
@@ -116,11 +122,11 @@ int starts_with(char *str, char *pre) {
 }
 
 /*
- * Reads a line from console
+ * Reads a line
  */
-char *read_from_console(void) {
-    char *line = malloc(100), *linep = line;
-    size_t lenmax = 100, len = lenmax;
+char *read_line(int ptr) {
+    char *line = malloc(128), *linep = line;
+    size_t lenmax = 128, len = lenmax;
     int c;
 
     if (line == NULL) {
@@ -128,7 +134,7 @@ char *read_from_console(void) {
     }
 
     for (;;) {
-        c = fgetc(stdin);
+        c = fgetc(ptr);
         if(c == EOF) {
             break;
         }
