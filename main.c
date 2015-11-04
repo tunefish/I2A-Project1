@@ -8,8 +8,6 @@
 #include "graph.h"
 #include "functions.h"
 
-FILE *fr; //declare the file pointer
-
 int main(int argc, void *argv) {
     graph_p graph = malloc(sizeof(graph_t));
 
