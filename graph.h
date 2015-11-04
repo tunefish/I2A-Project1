@@ -6,7 +6,7 @@ typedef struct vertex {
     struct edge *neighbors;     // pointer to first element of linked list of neighbors
     struct vertex *next;        // pointer to next vertex in vertex list
     
-    /** DFS traversal flags **/
+    /** BFS traversal flags **/
     
     int visited;                // visited flag
     int depth;                  // depth of this vertex from the root
@@ -27,7 +27,12 @@ typedef struct species {
     char *name;                 // name of species
 } species_t, *species_p;
 
-// graph functions.. add_vertex, add_edge, remove_vertex, remove_node
+graph_p create_graph();
+vertex_p add_vertex(graph_p graph, void *data);
+void remove_vertex(graph_p graph, vertex_p v);
+edge_p add_edge(graph_p graph, vertex_p v1, vertex_p v2);
+void remove_edge(graph_p graph, vertex_p v1, vertex_p v2);
 void reset(graph_p graph);
+void free_graph(graph_p graph);
 
 #endif

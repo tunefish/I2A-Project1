@@ -9,10 +9,9 @@
 #include "functions.h"
 
 int main(int argc, void *argv) {
-    graph_p graph = malloc(sizeof(graph_t));
+    graph_p graph = NULL;
 
     int exit = 0;
-    int file_loaded = 0;
     char *command;
     while (!exit) {
         printf(" > ");
@@ -37,28 +36,29 @@ int main(int argc, void *argv) {
                 memcpy(file, command+5, strlen(command) - 4);
                 
                 printf("Opening file %s\n", file);
-                if (file_loaded) {
-                    // TODO: close opened file
+                if (graph) {
+                    free_graph(graph);
+                    graph = NULL;
                 }
-
-                file_loaded = 1;
+                
+                graph = create_graph();
                 
                 free(file);
             }
             
         } else if (strcmp(command, "close") == 0) {
             // close currently opened file
-            if (file_loaded) {
+            if (graph) {
                 printf("Closing file..\n");
-                // TODO: free memory allocated for graph
-                file_loaded = 0;
+                free_graph(graph);
+                graph = NULL;
             } else {
                 printf("Error: no file opened\n");
             }
             
         } else if (starts_with(command, "cite")) {
             // cite <NR> subtypes of <species> of order <NR> command
-            if (file_loaded) {
+            if (graph) {
                 char *sp;
                 int order, num;
                 sscanf(command, "cite %d subtypes of %s of order %d", num, sp, order);
@@ -78,7 +78,7 @@ int main(int argc, void *argv) {
             
         } else if (starts_with(command, "most diverse subtype of")) {
             // most diverse subtype of <species> command
-            if (file_loaded) {
+            if (graph) {
                 char *sp;
                 sscanf(command, "most diverse subtype of %s", sp);
                 vertex_p result = most_diverse_subspecies(graph, sp);
@@ -94,7 +94,7 @@ int main(int argc, void *argv) {
             
         } else if (starts_with(command, "lowest common ancestor of")) {
             // lowest common ancestor of <species> and <species>
-            if (file_loaded) {
+            if (graph) {
                 char *sp1, *sp2, *start;
                 sscanf(command, "lowest common ancestor of %s and %s starting from %s", sp1, sp2, start);
                 vertex_p result = lowest_common_ancestor(graph, sp1, sp2, start);
@@ -110,8 +110,9 @@ int main(int argc, void *argv) {
         }
     }
 
-    // TODO: free memory
-    free(graph);
+    if (graph) {
+        free_graph(graph);
+    }
 
     return 0;
 }
