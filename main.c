@@ -51,7 +51,7 @@ int main(int argc, void *argv) {
 					graph = create_graph();
 					while ((line = read_line(fr)))
 					{
-						printf("%s", line);			//print entire line
+						printf("%s\n", line);			//print entire line
 
 						pch = strtok(line, ":");	//print line using : as delimiter
 						printf("%s\n", pch);
