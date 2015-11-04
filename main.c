@@ -11,6 +11,8 @@
 int main(int argc, void *argv) {
     graph_p graph = malloc(sizeof(graph_t));
 
+	FILE * fr;		//file pointer
+
     int exit = 0;
     int file_loaded = 0;
     char *command;
@@ -37,12 +39,22 @@ int main(int argc, void *argv) {
                 memcpy(file, command+5, strlen(command) - 4);
                 
                 printf("Opening file %s\n", file);
+				file_loaded = 1;
+				
                 if (file_loaded) {
-                    // TODO: close opened file
-                }
+					
+					char * line;
+					fr = fopen(file, "r");
+					if (!fr)
+						return 1;
 
-                file_loaded = 1;
-                
+					while ((line = read_line(fr)))
+					{
+						printf("%s", line);
+					}
+
+                }
+				fclose(fr);
                 free(file);
             }
             
