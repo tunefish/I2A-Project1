@@ -28,11 +28,14 @@ typedef struct species {
 } species_t, *species_p;
 
 graph_p create_graph();
-vertex_p add_vertex(graph_p graph, void *data);
-void remove_vertex(graph_p graph, vertex_p v);
-edge_p add_edge(graph_p graph, vertex_p v1, vertex_p v2);
-void remove_edge(graph_p graph, vertex_p v1, vertex_p v2);
-void reset(graph_p graph);
 void free_graph(graph_p graph);
+
+vertex_p add_vertex(graph_p graph, void *data);
+void *remove_vertex(graph_p graph, vertex_p v);
+
+edge_p add_edge(vertex_p v1, vertex_p v2);
+void remove_edge(vertex_p v1, vertex_p v2);
+
+void reset(graph_p graph);
 
 #endif
