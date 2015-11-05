@@ -4,7 +4,7 @@
 
 #include "functions.h"
 
-vertex_p find_vertex_by_name(graph_p graph, char *sp);
+vertex_p find_species_by_name(graph_p graph, char *sp);
 vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart);
 
 queue_p num_children(graph_p graph, char *sp, int order, int num) {
@@ -17,7 +17,7 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
         num = -1;
     }
     
-    vertex_p v = find_vertex_by_name(graph, sp);
+    vertex_p v = find_species_by_name(graph, sp);
 
     if (!v) {
         // initial species not found
@@ -61,8 +61,8 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
 }
 
 vertex_p most_diverse_subspecies(graph_p graph, char *sp) {
-    vertex_p v = find_vertex_by_name(graph, sp);
-
+    vertex_p v = find_species_by_name(graph, sp);
+    
     if (!v) {
         return NULL;
     }
@@ -102,9 +102,9 @@ vertex_p most_diverse_subspecies(graph_p graph, char *sp) {
 }
 
 vertex_p lowest_common_ancestor(graph_p graph, char *sp1, char *sp2, char *start) {
-    vertex_p v1 = find_vertex_by_name(graph, sp1);
-    vertex_p v2 = find_vertex_by_name(graph, sp2);
-    vertex_p vstart = find_vertex_by_name(graph, start);
+    vertex_p v1 = find_species_by_name(graph, sp1);
+    vertex_p v2 = find_species_by_name(graph, sp2);
+    vertex_p vstart = find_species_by_name(graph, start);
 
     if (!v1 || !v2 || vstart) {
         return NULL;
@@ -154,7 +154,7 @@ vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2
     return result;
 }
 
-vertex_p find_vertex_by_name(graph_p graph, char *sp) {
+vertex_p find_species_by_name(graph_p graph, char *sp) {
     vertex_p v = graph->vertices;
     
     while (v) {
