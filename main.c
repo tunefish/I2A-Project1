@@ -36,21 +36,34 @@ int main(int argc, void *argv) {
                     free_graph(graph);
                     graph = NULL;
                 }
-                
-                char * line;
-                fr = fopen(file, "r");
-                if (!fr) {
-                    printf("Error: file %s not found\n", file);
-                } else {
-                    graph = create_graph();
-                    while ((line = read_line(fr)))
-                    {
-                        printf("%s\n", line);
-                    }
-                }
-                
-				fclose(fr);
-                free(file);
+
+				char * line;		//pointer to line in file
+				char * pch;			//char pointer used while parsing with strtok
+
+				fr = fopen(file, "r");		//opens file
+				if (!fr) {
+					printf("Error: file %s not found\n", file);
+				} else {
+					graph = create_graph();
+					while ((line = read_line(fr)))
+					{
+						printf("%s\n", line);			//print entire line
+
+						pch = strtok(line, ":");	//print line using : as delimiter
+						printf("%s\n", pch);
+						pch = strtok(NULL, ":");
+
+						pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
+						while (pch != NULL)
+						{
+							printf("%s\n", pch);
+							pch = strtok(NULL, ", ");
+						}
+					}
+
+					fclose(fr);
+					free(file);
+				}
             }
             
         } else if (strcmp(command, "close") == 0) {
