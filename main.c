@@ -26,7 +26,6 @@ int main(int argc, void *argv) {
             
         } else if (starts_with(command, "open")) {
             // opens a file
-			//where is the file opened??
             if (strlen(command) > 5) {
                 // copy filename into file
                 char *file = (char*) malloc(strlen(command) - 4);
@@ -67,7 +66,7 @@ int main(int argc, void *argv) {
         } else if (starts_with(command, "cite")) {
             // cite <NR> subtypes of <species> of order <NR> command
             if (graph) {
-                char *sp;
+                char *sp = (char *) malloc(strlen(command) - 30);
                 int order, num;
                 sscanf(command, "cite %d subtypes of %s of order %d", num, sp, order);
                 queue_p result = num_children(graph, sp, order, num);
@@ -80,6 +79,8 @@ int main(int argc, void *argv) {
                     }
                     free_queue(result);
                 }
+                
+                free(sp);
             } else {
                 printf("Error: no file opened\n");
             }
@@ -87,8 +88,8 @@ int main(int argc, void *argv) {
         } else if (starts_with(command, "most diverse subtype of")) {
             // most diverse subtype of <species> command
             if (graph) {
-                char *sp;
-                sscanf(command, "most diverse subtype of %s", sp);
+                char *sp = (char*) malloc(strlen(command) - 23);
+                memcpy(sp, command+24, strlen(command) - 23);
                 vertex_p result = most_diverse_subspecies(graph, sp);
                 
                 if (!result) {
@@ -96,6 +97,8 @@ int main(int argc, void *argv) {
                 } else {
                     printf("%s\n", ((species_p) result->data)->name);
                 }
+                
+                free(sp);
             } else {
                 printf("Error: no file opened\n");
             }
@@ -103,7 +106,10 @@ int main(int argc, void *argv) {
         } else if (starts_with(command, "lowest common ancestor of")) {
             // lowest common ancestor of <species> and <species>
             if (graph) {
-                char *sp1, *sp2, *start;
+                char *sp1 = (char *) malloc(strlen(command) - 26);
+                char *sp2 = (char *) malloc(strlen(command) - 31);
+                char *start = (char *) malloc(strlen(command) - 46);
+                
                 sscanf(command, "lowest common ancestor of %s and %s starting from %s", sp1, sp2, start);
                 vertex_p result = lowest_common_ancestor(graph, sp1, sp2, start);
                 
@@ -112,6 +118,10 @@ int main(int argc, void *argv) {
                 } else {
                     printf("%s\n", ((species_p) result->data)->name);
                 }
+                
+                free(sp1);
+                free(sp2);
+                free(start);
             } else {
                 printf("Error: no file opened\n");
             }
@@ -146,10 +156,13 @@ char *read_line(FILE *ptr) {
 
     for (;;) {
         c = fgetc(ptr);
+        
+        // end of string / file => return string
         if(c == EOF) {
             break;
         }
 
+        // string buffer full => double the size
         if (--len == 0) {
             len = lenmax;
             char * linen = realloc(linep, lenmax *= 2);
@@ -163,6 +176,7 @@ char *read_line(FILE *ptr) {
             linep = linen;
         }
 
+        // end of line => return string
         if((*line++ = c) == '\n') {
             break;
         }
