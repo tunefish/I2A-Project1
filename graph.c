@@ -59,9 +59,8 @@ void *remove_vertex(graph_p graph, vertex_p v) {
     }
     
     // remove all outgoing edges
-    edge_p e = v->neighbors;
-    while (e) {
-        remove_edge(v, e->to);
+    while (v->neighbors) {
+        remove_edge(v, v->neighbors->to);
     }
     
     void *data = v->data;
@@ -73,7 +72,15 @@ void *remove_vertex(graph_p graph, vertex_p v) {
  * Adds an edge from v1 to v2 into a graph and returns the pointer to the edge
  */
 edge_p add_edge(vertex_p v1, vertex_p v2) {
-    edge_p e = (edge_p) malloc(sizeof(edge_t));
+    edge_p e = v1->neighbors;
+    while (e) {
+        if (e->to == v2) {
+            // edge already exists
+            return;
+        }
+    }
+    
+    e = (edge_p) malloc(sizeof(edge_t));
     e->to = v2;
     
     e->next = v1->neighbors;
