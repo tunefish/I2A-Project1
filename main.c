@@ -4,14 +4,15 @@
 #include <conio.h>
 #include <dos.h>
 
-#include "main.h"
 #include "graph.h"
 #include "functions.h"
 
+int starts_with(char *str, char *pre);
+char *read_line(FILE *ptr);
+graph_p parse_file(char *file);
+
 int main(int argc, void *argv) {
     graph_p graph = NULL;
-
-	FILE * fr;		//file pointer
 
     int exit = 0;
     char *command;
@@ -37,33 +38,8 @@ int main(int argc, void *argv) {
                     graph = NULL;
                 }
 
-				char * line;		//pointer to line in file
-				char * pch;			//char pointer used while parsing with strtok
-
-				fr = fopen(file, "r");		//opens file
-				if (!fr) {
-					printf("Error: file %s not found\n", file);
-				} else {
-					graph = create_graph();
-					while ((line = read_line(fr)))
-					{
-						printf("%s\n", line);			//print entire line
-
-						pch = strtok(line, ":");	//print line using : as delimiter
-						printf("%s\n", pch);
-						pch = strtok(NULL, ":");
-
-						pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
-						while (pch != NULL)
-						{
-							printf("%s\n", pch);
-							pch = strtok(NULL, ", ");
-						}
-					}
-
-					fclose(fr);
-					free(file);
-				}
+				graph = parse_file(file);
+                free(file);
             }
             
         } else if (strcmp(command, "close") == 0) {
@@ -146,6 +122,48 @@ int main(int argc, void *argv) {
     }
 
     return 0;
+}
+
+/*
+ * Parses a file into the graph data structure
+ */
+graph_p parse_file(char *file) {
+    graph_p graph = NULL;
+    FILE * fr;
+    
+    // pointer to line in file
+    char * line;
+    
+    // char pointer used while parsing with strtok
+    char * pch;
+
+    fr = fopen(file, "r");		//opens file
+    if (!fr) {
+        printf("Error: file %s not found\n", file);
+    } else {
+        graph = create_graph();
+        while ((line = read_line(fr)))
+        {
+            printf("%s\n", line);			//print entire line
+
+            pch = strtok(line, ":");	//print line using : as delimiter
+            printf("%s\n", pch);
+            pch = strtok(NULL, ":");
+
+            pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
+            while (pch != NULL)
+            {
+                printf("%s\n", pch);
+                // TODO: remove ALL white space characters
+                // TODO: insert into graph
+                pch = strtok(NULL, ", ");
+            }
+        }
+
+        fclose(fr);
+    }
+    
+    return graph;
 }
 
 /*
