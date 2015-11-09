@@ -1,9 +1,6 @@
 #include <stdlib.h>
-#include <limits.h>
 
 #include "functions.h"
-
-vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart);
 
 queue_p num_children(graph_p graph, char *sp, int order, int num) {
     if (order < 1) {
@@ -21,12 +18,6 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
         // initial species not found
         return NULL;
     }
-    
-    /*num_children_state_p state = (num_children_state_p) malloc(sizeof(num_children_state_t));
-    state->num = num;
-    state->order = order;
-    state->results = create_queue();
-    dfs(graph, v, state, NULL, &num_children_h_neighbor);*/
 
     // reset depth, parents and flags for all vertices
     reset(graph);
@@ -182,6 +173,9 @@ vertex_p lowest_common_ancestor(graph_p graph, char *sp1, char *sp2, char *start
     return NULL;
 }
 
+/*
+ * Find a species struct in a graph by its name
+ */
 vertex_p find_species_by_name(graph_p graph, char *sp) {
     vertex_p v = graph->vertices;
     
