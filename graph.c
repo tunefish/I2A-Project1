@@ -15,15 +15,15 @@ graph_p create_graph() {
 /*
  * Adds an vertex with data to a graph
  */
-vertex_p add_vertex(graph_p graph, void *data) {
+vertex_p add_vertex(graph_p graph, void *data, int depth, vertex_p parent) {
     vertex_p v = (vertex_p) malloc(sizeof(vertex_t));
     v->data = data;
     v->neighbors = NULL;
     v->next = graph->vertices;
     
     v->visited = 0;
-    v->depth = 0;
-    v->parent = NULL;
+    v->depth = depth;
+    v->parent = parent;
     
     graph->vertices = v;
     return v;

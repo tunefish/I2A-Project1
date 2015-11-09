@@ -30,7 +30,7 @@ typedef struct species {
 graph_p create_graph();
 void free_graph(graph_p graph);
 
-vertex_p add_vertex(graph_p graph, void *data);
+vertex_p add_vertex(graph_p graph, void *data, int depth, vertex_p parent);
 void *remove_vertex(graph_p graph, vertex_p v);
 
 edge_p add_edge(vertex_p v1, vertex_p v2);

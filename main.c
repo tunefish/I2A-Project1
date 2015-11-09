@@ -137,6 +137,8 @@ graph_p parse_file(char *file) {
     // char pointer used while parsing with strtok
     char * pch;
 
+	int depth = 0;
+
     fr = fopen(file, "r");		//opens file
     if (!fr) {
         printf("Error: file %s not found\n", file);
@@ -148,16 +150,30 @@ graph_p parse_file(char *file) {
 
             pch = strtok(line, ":");	//print line using : as delimiter
             printf("%s\n", pch);
+
+			//if vertex is not already in graph, turn pch into parent vertex in graph
+			//if (graph->vertices->data != pch)
+			add_vertex(graph, pch, depth, NULL);
+			//TODO: need to set parents if vertex is not root and add edge to parent
+
+			//temporary parent for children
+			char * parent = pch;
+
             pch = strtok(NULL, ":");
+			
 
             pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
             while (pch != NULL)
             {
                 printf("%s\n", pch);
                 // TODO: remove ALL white space characters
-                // TODO: insert into graph
+                //insert children into graph
+				add_vertex(graph, pch, depth + 1, parent);
+				//TODO: add edge from parent to child
                 pch = strtok(NULL, ", ");
+				
             }
+			depth = depth + 1;
         }
 
         fclose(fr);
