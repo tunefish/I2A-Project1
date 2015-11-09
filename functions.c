@@ -1,10 +1,8 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
 
 #include "functions.h"
 
-vertex_p find_species_by_name(graph_p graph, char *sp);
 vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart);
 
 queue_p num_children(graph_p graph, char *sp, int order, int num) {
@@ -23,29 +21,39 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
         // initial species not found
         return NULL;
     }
+    
+    /*num_children_state_p state = (num_children_state_p) malloc(sizeof(num_children_state_t));
+    state->num = num;
+    state->order = order;
+    state->results = create_queue();
+    dfs(graph, v, state, NULL, &num_children_h_neighbor);*/
 
-    // reset depth and visited flags for all vertices
+    // reset depth, parents and flags for all vertices
     reset(graph);
     
     // abuse queue structure as a list of results
-    queue_p result = (queue_p) malloc(sizeof(queue_t));
+    queue_p result = create_queue();
     
     queue_p queue = create_queue();
     enqueue(queue, v);
     v->depth = 0;
     
+    edge_p e;
+    
     // classic BFS:
-    // repeat as long as there are more species to discover or we reached max wanted results (for all results: num < 0)
+    // repeat as long as there are more descendants to discover and we did not reach the max wanted results (for all results: num < 0)
     while (!is_empty(queue) && num != 0) {
         v = dequeue(queue);
-        edge_p e = v->neighbors;
+        e = v->neighbors;
         
-        while (e && num != 0) { // repeat for all neighbors until max number of results is reached
-            if (!e->to->visited) {
-                e->to->visited = 1;
-                enqueue(result, e);
+        // repeat for all neighbors until max number of results is reached
+        while (e && num != 0) {
+            if (!e->to->flag & VERTEX_VISITED) {
+                e->to->flag |= VERTEX_VISITED;
+                enqueue(result, e->to);
                 num--;
                 
+                // only continue BFS if max depth is not exceeded
                 if (v->depth < order - 1) {
                     e->to->depth = v->depth + 1;
                     enqueue(queue, e->to);
@@ -57,41 +65,49 @@ queue_p num_children(graph_p graph, char *sp, int order, int num) {
     }
     
     free_queue(queue);
+    
     return result;
 }
 
 vertex_p most_diverse_subspecies(graph_p graph, char *sp) {
-    vertex_p v = find_species_by_name(graph, sp);
+    vertex_p start = find_species_by_name(graph, sp);
     
-    if (!v) {
+    if (!start) {
+        // initial species not found
         return NULL;
     }
 
+    // reset depth, parents and flags for all vertices
     reset(graph);
     
     vertex_p result = NULL;
     int result_neighbors = -1;
     
     queue_p queue = create_queue();
-    enqueue(queue, v);
+    enqueue(queue, start);
+    
+    vertex_p v;
+    edge_p e;
+    int neighbors;
     
     // classic BFS (DFS works as well):
-    // look for species with the most subtypes
+    // look among all descendants for the one with the most subtypes
     while (!is_empty(queue)) {
         v = dequeue(queue);
-        edge_p e = v->neighbors;
+        e = v->neighbors;
         
-        int neighbors = 0;
+        neighbors = 0;
         while (e) {
-            if (!e->to->visited) {
-                e->to->visited = 1;
+            if (!e->to->flag & VERTEX_VISITED) {
+                e->to->flag |= VERTEX_VISITED;
                 enqueue(queue, e->to);
             }
             neighbors++;
             e = e->next;
         }
         
-        if (neighbors > result_neighbors) {
+        // if a more diverse species is found, replace previous result
+        if (start != v && neighbors > result_neighbors) {
             result = v;
             result_neighbors = neighbors;
         }
@@ -106,59 +122,71 @@ vertex_p lowest_common_ancestor(graph_p graph, char *sp1, char *sp2, char *start
     vertex_p v2 = find_species_by_name(graph, sp2);
     vertex_p vstart = find_species_by_name(graph, start);
 
-    if (!v1 || !v2 || vstart) {
+    if (!v1 || !v2 || !vstart) {
+        // at least one of the initial species couldn't be found
         return NULL;
     }
 
+    // reset depth, parents and flags for all vertices
     reset(graph);
     
-    edge_p e = vstart->neighbors;
+    queue_p queue = create_queue();
+    enqueue(queue, vstart);
     
-    vertex_p result = NULL;
-    int depth = INT_MAX;
-    while (e) {
-        if (!e->to->visited) {
-            e->to->visited = 1;
-            e->to->depth = vstart->depth + 1;
-            vertex_p n = lowest_common_ancestor_internal(graph, v1, v2, e->to);
-            
-            if (n->depth < depth) {
-                depth = n->depth;
-                result = n;
+    vertex_p v;
+    edge_p e;
+    int not_both_found = VERTEX_RED | VERTEX_BLUE;
+    
+    // classic BFS:
+    // explore descendants until v1 and v2 have been found; save parent in DFS tree for each vertex
+    while (!is_empty(queue) && not_both_found) {
+        v = dequeue(queue);
+        e = v->neighbors;
+        
+        while (e && not_both_found) {
+            if (!e->to->flag & VERTEX_VISITED) {
+                e->to->flag |= VERTEX_VISITED;
+                e->to->parent = v;
+                
+                if (e->to == v1) {
+                    not_both_found &= VERTEX_RED;
+                } else if (e->to == v2) {
+                    not_both_found &= VERTEX_BLUE;
+                }
+                enqueue(queue, e->to);
             }
+            e = e->next;
         }
     }
-
-    return result;
-}
-
-vertex_p lowest_common_ancestor_internal(graph_p graph, vertex_p v1, vertex_p v2, vertex_p vstart) {
-    edge_p e = vstart->neighbors;
+    free_queue(queue);
     
-    vertex_p result = NULL;
-    int depth = INT_MAX;
-    while (e) {
-        if (e->to == v1)
-        if (!e->to->visited) {
-            e->to->visited = 1;
-            e->to->depth = vstart->depth + 1;
-            vertex_p n = lowest_common_ancestor_internal(graph, v1, v2, e->to);
-            
-            if (n->depth < depth) {
-                depth = n->depth;
-                result = n;
-            }
+    if (not_both_found) {
+        return NULL;
+    }
+    
+    // mark all parents of v1 as blue
+    while (v1) {
+        v1->flag |= VERTEX_BLUE;
+        v1 = v1->parent;
+    }
+    
+    // the first vertex marked as blue is the lowest common ancestor
+    while (v2) {
+        if (v2->flag & VERTEX_BLUE) {
+            return v2;
         }
+        v2 = v2->parent;
     }
 
-    return result;
+    // THIS SHOULD NEVER HAPPEN
+    return NULL;
 }
 
 vertex_p find_species_by_name(graph_p graph, char *sp) {
     vertex_p v = graph->vertices;
     
     while (v) {
-        if (strcmp(((species_p) v->data)->name, sp) != 0) {
+        if (!strcmp(((species_p) v->data)->name, sp)) {
             return v;
         }
         

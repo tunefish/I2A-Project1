@@ -10,6 +10,7 @@
 int starts_with(char *str, char *pre);
 char *read_line(FILE *ptr);
 graph_p parse_file(char *file);
+void sanitize_name(char* str);
 
 int main(int argc, void *argv) {
     graph_p graph = NULL;
@@ -57,12 +58,12 @@ int main(int argc, void *argv) {
             if (graph) {
                 char *sp = (char *) malloc(strlen(command) - 30);
                 int order, num;
-                sscanf(command, "cite %d subtypes of %s of order %d", num, sp, order);
+                sscanf(command, "cite %d subtypes of %s of order %d", &num, sp, &order);
                 queue_p result = num_children(graph, sp, order, num);
                 
                 if (!result) {
                     printf("Species %s not found\n", sp);
-                } else {                
+                } else {
                     while (!is_empty(result)) {
                         printf("%s\n", ((species_p) ((vertex_p) dequeue(result))->data)->name);
                     }
@@ -93,7 +94,7 @@ int main(int argc, void *argv) {
             }
             
         } else if (starts_with(command, "lowest common ancestor of")) {
-            // lowest common ancestor of <species> and <species>
+            // lowest common ancestor of <species> and <species> starting from <species> command
             if (graph) {
                 char *sp1 = (char *) malloc(strlen(command) - 26);
                 char *sp2 = (char *) malloc(strlen(command) - 31);
@@ -135,45 +136,61 @@ graph_p parse_file(char *file) {
     char * line;
     
     // char pointer used while parsing with strtok
-    char * pch;
-
-	int depth = 0;
+    char * name;
 
     fr = fopen(file, "r");		//opens file
     if (!fr) {
         printf("Error: file %s not found\n", file);
     } else {
         graph = create_graph();
-        while ((line = read_line(fr)))
-        {
-            printf("%s\n", line);			//print entire line
-
-            pch = strtok(line, ":");	//print line using : as delimiter
-            printf("%s\n", pch);
-
-			//if vertex is not already in graph, turn pch into parent vertex in graph
-			//if (graph->vertices->data != pch)
-			add_vertex(graph, pch, depth, NULL);
-			//TODO: need to set parents if vertex is not root and add edge to parent
-
-			//temporary parent for children
-			char * parent = pch;
-
-            pch = strtok(NULL, ":");
-			
-
-            pch = strtok(pch, ", ");	//print remainder of line using , as delimeter
-            while (pch != NULL)
-            {
-                printf("%s\n", pch);
-                // TODO: remove ALL white space characters
-                //insert children into graph
-				add_vertex(graph, pch, depth + 1, parent);
-				//TODO: add edge from parent to child
-                pch = strtok(NULL, ", ");
-				
+        while ((line = read_line(fr))) {
+            // split parent species from child species
+            name = strtok(line, ":");
+            
+            // ignore empty lines // lines without ':'
+            if (!name) {
+                continue;
             }
-			depth = depth + 1;
+            sanitize_name(name);
+            
+            // ignore empty names
+            if (*name == '\0' || strlen(name) == 0) {
+                continue;
+            }
+            
+            vertex_p v_parent = find_species_by_name(graph, name);
+
+			if (!v_parent) {
+                species_p parent = (species_p) malloc(sizeof(species_t) + strlen(name) + 1);
+                memcpy(parent->name, name, strlen(name) + 1);
+                v_parent = add_vertex(graph, parent);
+            }
+
+            // get all children
+            name = strtok(NULL, ":");
+            
+            name = strtok(name, ",");
+            while (name != NULL) {
+                sanitize_name(name);
+                
+                // ignore empty names
+                if (*name == '\0' || strlen(name) == 0) {
+                    name = strtok(NULL, ",");
+                    continue;
+                }
+                
+                // species_t contains a string of dynamic length => add length of string to size
+                vertex_p v = find_species_by_name(graph, name);
+                if (!v) {
+                    species_p sp = (species_p) malloc(sizeof(species_t) + strlen(name) + 1);
+                    memcpy(sp->name, name, strlen(name) + 1);
+                    v = add_vertex(graph, sp);
+                }
+                add_edge(v_parent, v);
+                
+                // read next child's name
+                name = strtok(NULL, ",");
+            }
         }
 
         fclose(fr);
@@ -242,4 +259,23 @@ char *read_line(FILE *ptr) {
     }
     
     return linep;
+}
+
+/*
+ * Removes all whitespace caracters from a string
+ */
+void sanitize_name(char *str) {
+    int i = 0;
+    int j = 0;
+    while (i < strlen (str)) {
+        if (isalpha(str[i])) {
+            str[j] = tolower(str[i]);
+            i++;
+            j++;
+        } else {
+            i++;
+        }
+    }
+    
+    str[j] = '\0';
 }

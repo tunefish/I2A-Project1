@@ -5,6 +5,7 @@ typedef struct queue_element {
 
 typedef struct queue {
     queue_element_p first;
+    queue_element_p last;
 } queue_t, *queue_p;
 
 queue_p create_queue();

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "graph.h"
@@ -15,15 +14,15 @@ graph_p create_graph() {
 /*
  * Adds an vertex with data to a graph
  */
-vertex_p add_vertex(graph_p graph, void *data, int depth, vertex_p parent) {
+vertex_p add_vertex(graph_p graph, void *data) {
     vertex_p v = (vertex_p) malloc(sizeof(vertex_t));
     v->data = data;
     v->neighbors = NULL;
     v->next = graph->vertices;
     
-    v->visited = 0;
-    v->depth = depth;
-    v->parent = parent;
+    v->flag = 0;
+    v->depth = 0;
+    v->parent = NULL;
     
     graph->vertices = v;
     return v;
@@ -78,6 +77,8 @@ edge_p add_edge(vertex_p v1, vertex_p v2) {
             // edge already exists
             return;
         }
+        
+        e = e->next;
     }
     
     e = (edge_p) malloc(sizeof(edge_t));
@@ -118,7 +119,7 @@ void reset(graph_p graph) {
     vertex_p v = graph->vertices;
     
     while (v) {
-        v->visited = 0;
+        v->flag = 0;
         v->depth = 0;
         v->parent = NULL;
         

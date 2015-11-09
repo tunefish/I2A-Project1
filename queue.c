@@ -5,6 +5,7 @@
 queue_p create_queue() {
     queue_p q= (queue_p) malloc(sizeof(queue_t));
     q->first = NULL;
+    q->last = NULL;
     return q;
 }
 
@@ -24,17 +25,21 @@ void enqueue(queue_p q, void *d) {
     if (!q->first) {
         q->first = e;
     } else {
-        queue_element_p c = q->first;
-        while (c) c = c->next;
-        c->next = e;
+        q->last->next = e;
     }
+    q->last = e;
 }
 
 void *dequeue(queue_p q) {
     void *res = q->first->data;
-    queue_element_p new_first = q->first->next;
-    free(q->first);
-    q->first = new_first;
+    queue_element_p f = q->first;
+    
+    q->first = f->next;
+    if (!f->next) {
+        q->last = NULL;
+    }
+    
+    free(f);
     
     return res;
 }
